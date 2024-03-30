@@ -2,39 +2,25 @@ import {MODE, NAMES} from '../../variables.ts';
 import {Button} from '../Button/Button.tsx';
 import classes from './Settings.module.css'
 import {Label} from './Label/Label.tsx';
-import {ModeType} from '../../App.tsx';
+import {useDispatch, useSelector} from 'react-redux';
+import {AppStoreType} from '../../store/store.ts';
+import {changeMaxValueAC, changeStartValueAC, CounterType, setSettingsValueAC} from '../../store/counter-reducer.ts';
 
-type SettingsProps = {
-    maxValue: number
-    startValue: number
-    setSettings: (maxValue: number, startValue: number) => void
-    setMaxValue: (maxValue: number) => void
-    setStartValue: (maxValue: number) => void
-    mode: ModeType
-    setMode: (mode: ModeType) => void
-};
-export const Settings = ({maxValue, startValue, setSettings, setMaxValue, setStartValue, mode, setMode}: SettingsProps) => {
+
+export const Settings = () => {
+    const dispatch = useDispatch()
+    const counter = useSelector<AppStoreType, CounterType>(store => store.counter)
 
     const setSettingsHandler = () => {
-        setSettings(maxValue, startValue)
+        dispatch(setSettingsValueAC(counter.maxValue, counter.startValue))
     }
 
     const onChangeMaxValueHandler = (value: number) => {
-        setMaxValue(value)
-        if (value > startValue) {
-            setMode(MODE.EDIT)
-        } else {
-            setMode(MODE.ERROR)
-        }
+        dispatch(changeMaxValueAC(value))
     }
 
     const onChangeStartValueHandler = (value: number) => {
-        setStartValue(value)
-        if (value < maxValue && value >= 0) {
-            setMode(MODE.EDIT)
-        } else {
-            setMode(MODE.ERROR)
-        }
+        dispatch(changeStartValueAC(value))
     }
 
 
@@ -43,19 +29,19 @@ export const Settings = ({maxValue, startValue, setSettings, setMaxValue, setSta
             <div className={`${classes.settings__wrapper} ${classes.labels}`}>
                 <Label
                     label={NAMES.MAX_VALUE}
-                    value={maxValue}
+                    value={counter.maxValue}
                     onChange={onChangeMaxValueHandler}
-                    error={maxValue <= startValue}
+                    error={counter.maxValue <= counter.startValue}
                 />
                 <Label
                     label={NAMES.START_VALUE}
-                    value={startValue}
+                    value={counter.startValue}
                     onChange={onChangeStartValueHandler}
-                    error={startValue >= maxValue || startValue < 0}
+                    error={counter.startValue >= counter.maxValue || counter.startValue < 0}
                 />
             </div>
             <div className={classes.settings__wrapper}>
-                <Button onClick={setSettingsHandler} disable={mode === MODE.NORMAL || mode === MODE.ERROR || startValue < 0}>{NAMES.SET}</Button>
+                <Button onClick={setSettingsHandler} disable={counter.mode === MODE.NORMAL || counter.mode === MODE.ERROR || counter.startValue < 0}>{NAMES.SET}</Button>
             </div>
         </div>
     );
